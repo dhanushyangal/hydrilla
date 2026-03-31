@@ -1,0 +1,27 @@
+[Unit]
+Description=Hydrilla.co TRELLIS.2 API (image/text to 3D)
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/home/ubuntu/hydrilla
+Environment="PYTHONPATH=/home/ubuntu/TRELLIS.2"
+Environment="ATTN_BACKEND=flash_attn"
+Environment="ENABLE_S3=1"
+Environment="PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True"
+Environment="PYTHONNOUSERSITE=1"
+Environment="TRELLIS_IMAGE_SIZE=1024"
+Environment="GLB_TEXTURE_SIZE=2048"
+Environment="MESH_SIMPLIFY_TARGET=500000"
+Environment="MESH_SIMPLIFY_FACES=4000000"
+Environment="MAX_WORKERS=2"
+ExecStart=/home/ubuntu/miniconda3/envs/trellis2/bin/python -m uvicorn app:app --host 0.0.0.0 --port 8000
+Restart=on-failure
+RestartSec=30
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

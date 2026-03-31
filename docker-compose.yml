@@ -1,0 +1,56 @@
+services:
+  hydrilla-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.host-trellis
+    image: hydrilla/hydrilla-api:gpu
+    container_name: hydrilla-api
+    ports:
+      - "${PORT:-8000}:8000"
+    environment:
+      PORT: 8000
+      CONDA_ENV_NAME: ${CONDA_ENV_NAME:-trellis2}
+      # Important: mount TRELLIS.2 to the same absolute path used on the host
+      # so any editable installs (.pth) and compiled extensions resolve correctly.
+      TRELLIS2_ROOT: ${TRELLIS2_ROOT:-/home/ubuntu/TRELLIS.2}
+      HF_TOKEN: ${HF_TOKEN:-}
+      HUGGING_FACE_HUB_TOKEN: ${HUGGING_FACE_HUB_TOKEN:-}
+      HF_HOME: /root/.cache/huggingface
+      ENABLE_S3: ${ENABLE_S3:-0}
+      S3_BUCKET: ${S3_BUCKET:-hydrilla-outputs}
+      S3_REGION: ${S3_REGION:-ap-south-1}
+      S3_PRESIGNED_URL_EXPIRY: ${S3_PRESIGNED_URL_EXPIRY:-3600}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+      AWS_SESSION_TOKEN: ${AWS_SESSION_TOKEN:-}
+      DEFAULT_QUALITY: ${DEFAULT_QUALITY:-standard}
+      TRELLIS_IMAGE_SIZE: ${TRELLIS_IMAGE_SIZE:-1024}
+      GLB_TEXTURE_SIZE: ${GLB_TEXTURE_SIZE:-2048}
+      MESH_SIMPLIFY_TARGET: ${MESH_SIMPLIFY_TARGET:-500000}
+      MESH_SIMPLIFY_FACES: ${MESH_SIMPLIFY_FACES:-4000000}
+      ESTIMATED_3D_TIME_SECONDS: ${ESTIMATED_3D_TIME_SECONDS:-90}
+      MAX_WORKERS: ${MAX_WORKERS:-2}
+      MAX_QUEUE_LENGTH: ${MAX_QUEUE_LENGTH:-5}
+      MAX_PREVIEW_QUEUE_LENGTH: ${MAX_PREVIEW_QUEUE_LENGTH:-5}
+      HF_HUB_DISABLE_PROGRESS_BARS: 1
+      TQDM_DISABLE: 1
+      PYTORCH_CUDA_ALLOC_CONF: expandable_segments:True
+      ATTN_BACKEND: ${ATTN_BACKEND:-flash_attn}
+    volumes:
+      - hydrilla_outputs:/app/outputs
+      - hf_cache:/root/.cache/huggingface
+      # Mount host conda at its *real* prefix path so conda scripts work.
+      - ${HOST_CONDA_DIR:-/home/ubuntu/miniconda3}:/home/ubuntu/miniconda3:rw
+      - ${HOST_TRELLIS2_DIR:-/home/ubuntu/TRELLIS.2}:/home/ubuntu/TRELLIS.2:rw
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
+volumes:
+  hydrilla_outputs:
+  hf_cache:

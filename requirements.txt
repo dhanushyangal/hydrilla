@@ -1,0 +1,32 @@
+# hydrilla.co - API server with TRELLIS.2-4B for 3D generation
+# Run from TRELLIS.2 repo root (or set PYTHONPATH) so trellis2 + o_voxel are available.
+
+# Web
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+python-multipart>=0.0.6
+
+# Image & HTTP
+Pillow>=10.0.0
+requests>=2.31.0
+# o_voxel (TRELLIS) loads cv2 in postprocess; Dockerfile pre-installs headless OpenCV before -e o-voxel
+opencv-python-headless>=4.8.0
+
+# AWS (optional)
+boto3>=1.28.0
+
+# Background removal
+rembg[gpu]>=2.0.50
+
+# Text-to-image (Z-Image-Turbo or SDXL)
+# torch + torchvision: installed in Dockerfile from download.pytorch.org/whl/cu124
+diffusers>=0.30.0
+safetensors>=0.4.0
+transformers>=4.46,<5
+huggingface_hub>=0.20.0
+accelerate>=0.25.0
+gguf>=0.10.0
+easydict>=1.13
+
+# TRELLIS.2-4B stack: Docker runs trellis-setup-docker.sh (setup.sh-equivalent, no conda / no nvidia-smi at build).
+# Local dev: clone TRELLIS.2 and run the same flags, or pip install -e o-voxel with torch cu124.
